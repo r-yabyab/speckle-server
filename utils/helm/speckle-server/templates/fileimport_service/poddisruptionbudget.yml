@@ -1,0 +1,16 @@
+{{- if (or .Values.s3.endpoint .Values.s3.configMap.enabled) -}}
+{{- if (gt (.Values.fileimport_service.replicas | int) 1) }}
+apiVersion: {{ ternary "policy/v1" "policy/v1beta1" (semverCompare ">=1.21.0-0" .Capabilities.KubeVersion.Version) }}
+kind: PodDisruptionBudget 
+metadata:
+  name: {{ include "fileimport_service.name" $ }}
+  namespace: {{ .Values.namespace }}
+  labels: 
+{{- include "fileimport_service.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{- include "fileimport_service.selectorLabels" . | indent 6 }}
+  minAvailable: {{ .Values.fileimport_service.minAvailable }}
+{{- end }}
+{{- end }}

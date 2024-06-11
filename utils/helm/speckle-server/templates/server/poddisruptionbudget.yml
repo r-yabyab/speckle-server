@@ -1,0 +1,14 @@
+{{- if (gt (.Values.server.replicas | int) 1) }}
+apiVersion: {{ ternary "policy/v1" "policy/v1beta1" (semverCompare ">=1.21.0-0" .Capabilities.KubeVersion.Version) }}
+kind: PodDisruptionBudget 
+metadata:
+  name: {{ include "server.name" $ }}
+  namespace: {{ .Values.namespace }}
+  labels: 
+{{- include "server.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{- include "server.selectorLabels" . | indent 6 }}
+  minAvailable: {{ .Values.server.minAvailable }}
+{{- end }}

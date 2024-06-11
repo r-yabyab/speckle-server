@@ -1,0 +1,16 @@
+{{- if .Values.frontend_2.enabled }}
+{{- if (gt (.Values.frontend_2.replicas | int) 1) }}
+apiVersion: {{ ternary "policy/v1" "policy/v1beta1" (semverCompare ">=1.21.0-0" .Capabilities.KubeVersion.Version) }}
+kind: PodDisruptionBudget 
+metadata:
+  name: {{ include "frontend_2.name" $ }}
+  namespace: {{ .Values.namespace }}
+  labels: 
+{{- include "frontend_2.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{- include "frontend_2.selectorLabels" . | indent 6 }}
+  minAvailable: {{ .Values.frontend_2.minAvailable }}
+{{- end}}
+{{- end}}

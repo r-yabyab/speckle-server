@@ -1,0 +1,14 @@
+{{- if (gt (.Values.webhook_service.replicas | int) 1) }}
+apiVersion: {{ ternary "policy/v1" "policy/v1beta1" (semverCompare ">=1.21.0-0" .Capabilities.KubeVersion.Version) }}
+kind: PodDisruptionBudget 
+metadata:
+  name: {{ include "webhook_service.name" $ }}
+  namespace: {{ .Values.namespace }}
+  labels: 
+{{- include "webhook_service.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+{{- include "webhook_service.selectorLabels" . | indent 6 }}
+  minAvailable: {{ .Values.webhook_service.minAvailable }}
+{{- end }}
